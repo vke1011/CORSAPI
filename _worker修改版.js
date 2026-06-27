@@ -555,8 +555,8 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
       <p>在 API 请求前添加代理地址和 + <code>?url=</code>参数：</p>
       <pre><span class="g">${defaultPrefix}https://api.example.com/endpoint</span></pre>
       <p>示例：代理一个 API 请求</p>
-      <pre><span class="g">原始请求: </span><span class="g">https://api.example.com/data?id=123</span>
-<span class="g">通过代理: </span><span class="g">${currentOrigin}/?url=https://api.example.com/data&id=123</span></pre>
+      <pre>原始请求: <span class="g">https://api.example.com/data?id=123</span>
+通过代理: <span class="g">${currentOrigin}/?url=https://api.example.com/data&id=123</span></pre>
     </div>
 
     <div class="section">
@@ -575,8 +575,8 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
       <div class="section-title">🔧 参数转发</div>
       <p>所有额外的 query 参数都会自动转发到目标 API：</p>
       <p>参数自动转发示例</p>
-      <pre><span class="g">请求：</span><span class="g">${currentOrigin}/?url=https://api.example.com/list&page=1&limit=10</span>
-<span class="g">转发：</span><span class="g">https://api.example.com/list?page=1&limit=10</span></pre>
+      <pre>请求：<span class="g">${currentOrigin}/?url=https://api.example.com/list&page=1&limit=10</span>
+转发：<span class="g">https://api.example.com/list?page=1&limit=10</span></pre>
     </div>
 
     <div class="section">
@@ -608,33 +608,33 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
   <div class="section-title">📦 配置订阅链接示例</div>
 
   <p>精简版（jin18）</p>
-<pre><span class="g">原始 JSON：</span>
+<pre>原始 JSON：
 <span class="g copyable">${currentOrigin}/?format=0&source=jin18</span> <button class="copy-btn" data-url="${currentOrigin}/?format=0&source=jin18">复制</button><br>
-<span class="g">中转 JSON：</span>
+中转 JSON：
 <span class="g copyable">${currentOrigin}/?format=1&source=jin18</span> <button class="copy-btn" data-url="${currentOrigin}/?format=1&source=jin18">复制</button><br>
-<span class="g">原始 Base58：</span>
+原始 Base58：
 <span class="g copyable">${currentOrigin}/?format=2&source=jin18</span> <button class="copy-btn" data-url="${currentOrigin}/?format=2&source=jin18">复制</button><br>
-<span class="g">中转 Base58：</span>
+中转 Base58：
 <span class="g copyable">${currentOrigin}/?format=3&source=jin18</span> <button class="copy-btn" data-url="${currentOrigin}/?format=3&source=jin18">复制</button></pre>
 
   <p>精简版+成人（jingjian）</p>
-<pre><span class="g">原始 JSON：</span>
+<pre>原始 JSON：
 <span class="g copyable">${currentOrigin}/?format=0&source=jingjian</span> <button class="copy-btn" data-url="${currentOrigin}/?format=0&source=jingjian">复制</button><br>
-<span class="g">中转 JSON：</span>
+中转 JSON：
 <span class="g copyable">${currentOrigin}/?format=1&source=jingjian</span> <button class="copy-btn" data-url="${currentOrigin}/?format=1&source=jingjian">复制</button><br>
-<span class="g">原始 Base58：</span>
+原始 Base58：
 <span class="g copyable">${currentOrigin}/?format=2&source=jingjian</span> <button class="copy-btn" data-url="${currentOrigin}/?format=2&source=jingjian">复制</button><br>
-<span class="g">中转 Base58：</span>
+中转 Base58：
 <span class="g copyable">${currentOrigin}/?format=3&source=jingjian</span> <button class="copy-btn" data-url="${currentOrigin}/?format=3&source=jingjian">复制</button></pre>
 
   <p>完整版（full，默认）</p>
-<pre><span class="g">原始 JSON：</span>
+<pre>原始 JSON：
 <span class="g copyable">${currentOrigin}/?format=0&source=full</span> <button class="copy-btn" data-url="${currentOrigin}/?format=0&source=full">复制</button><br>
-<span class="g">中转 JSON：</span>
+中转 JSON：
 <span class="g copyable">${currentOrigin}/?format=1&source=full</span> <button class="copy-btn" data-url="${currentOrigin}/?format=1&source=full">复制</button><br>
-<span class="g">原始 Base58：</span>
+原始 Base58：
 <span class="g copyable">${currentOrigin}/?format=2&source=full</span> <button class="copy-btn" data-url="${currentOrigin}/?format=2&source=full">复制</button><br>
-<span class="g">中转 Base58：</span>
+中转 Base58：
 <span class="g copyable">${currentOrigin}/?format=3&source=full</span> <button class="copy-btn" data-url="${currentOrigin}/?format=3&source=full">复制</button></pre>
 </div>
 
