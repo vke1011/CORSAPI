@@ -309,7 +309,7 @@ async function handleFormatRequest(formatParam, sourceParam, prefixParam, defaul
   }
 }
 
-// ---------- 首页文档处理（深色主题 + 绿色高亮，保持原内容与排列） ----------
+// ---------- 首页文档处理（深色主题 + 绿色高亮） ----------
 async function handleHomePage(currentOrigin, defaultPrefix) {
   const html = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -356,32 +356,10 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
       margin-bottom: 8px;
       color: var(--text);
     }
-    .hero h1 .accent {
-      color: var(--luna-green);
-    }
     .hero p {
       color: var(--sub);
       font-size: 14px;
       margin-bottom: 16px;
-    }
-    .url-card {
-      background: #0b0e14;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-family: 'SF Mono', Consolas, Monaco, monospace;
-      font-size: 13px;
-      color: var(--luna-green);
-      word-break: break-all;
-      margin-bottom: 8px;
-    }
-    .url-card .label {
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 6px;
-      font-family: -apple-system, sans-serif;
     }
     /* 章节 */
     .section {
@@ -429,7 +407,6 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
       white-space: pre;
     }
     pre .g { color: var(--luna-green); }
-    pre .d { color: var(--muted); }
     code {
       background: rgba(34, 197, 94, 0.12);
       color: var(--luna-green);
@@ -438,7 +415,6 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
       font-family: 'SF Mono', Consolas, Monaco, monospace;
       font-size: 12.5px;
     }
-    code.d { color: var(--muted); background: rgba(107,114,128,0.1); }
     ul {
       list-style: none;
       padding: 0;
@@ -460,7 +436,7 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
       border-radius: 50%;
       flex-shrink: 0;
     }
-    /* 示例 / 表格 */
+    /* 示例 / 表格（专属class） */
     .example {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border);
@@ -468,17 +444,13 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
       padding: 16px;
       margin: 12px 0;
     }
-    .example strong {
-      color: var(--luna-green);
-      font-weight: 600;
-    }
-    table {
+    .config-table {
       width: 100%;
       border-collapse: collapse;
       margin: 8px 0;
       color: var(--sub);
     }
-    td {
+    .config-table td {
       padding: 6px 8px;
       vertical-align: middle;
       border-bottom: 1px solid var(--border);
@@ -543,10 +515,9 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
   <div class="container">
     <!-- 头部 -->
     <div class="hero">
-      <h1>🔄 CORSAPI</h1>
+      <h1>🔄 CORSAPI / LunaTV</h1>
       <p><span class="status"></span>API 中转代理服务正在运行</p>
-      
-    <p>基于 Cloudflare Workers 的通用 API 中转代理服务，用于加速和转发 API 请求。</p>
+      <p>基于 Cloudflare Workers 的通用 API 中转代理服务，用于加速和转发 API 请求。</p>
     </div>
 
     <!-- 示例 -->
@@ -582,33 +553,33 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
     <div class="section">
       <div class="section-title">⚙️ 配置订阅参数说明</div>
       <div class="example">
-        <table>
+        <table class="config-table">
           <tr>
-            <td>format</td>
+            <td><code>format</code></td>
             <td><code>0</code> 或 <code>raw</code> = 原始 JSON<br>
                 <code>1</code> 或 <code>proxy</code> = 添加代理前缀<br>
                 <code>2</code> 或 <code>base58</code> = 原始 Base58 编码<br>
                 <code>3</code> 或 <code>proxy-base58</code> = 代理 Base58 编码</td>
           </tr>
           <tr>
-            <td>source</td>
+            <td><code>source</code></td>
             <td><code>jin18</code> = 精简版<br>
                 <code>jingjian</code> = 精简版+成人<br>
                 <code>full</code> = 完整版（默认）</td>
           </tr>
           <tr>
-            <td>prefix</td>
+            <td><code>prefix</code></td>
             <td>自定义代理前缀（仅在 <code>format=1</code> 或 <code>3</code> 时生效）</td>
           </tr>
         </table>
       </div>
     </div>
 
-<div class="section">
-  <div class="section-title">📦 配置订阅链接示例</div>
+    <div class="section">
+      <div class="section-title">📦 配置订阅链接示例</div>
 
-  <p>精简版（jin18）</p>
-<pre>原始 JSON：
+      <p>精简版（jin18）</p>
+      <pre>原始 JSON：
 <span class="g copyable">${currentOrigin}/?format=0&source=jin18</span> <button class="copy-btn" data-url="${currentOrigin}/?format=0&source=jin18">复制</button><br>
 中转 JSON：
 <span class="g copyable">${currentOrigin}/?format=1&source=jin18</span> <button class="copy-btn" data-url="${currentOrigin}/?format=1&source=jin18">复制</button><br>
@@ -617,8 +588,8 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
 中转 Base58：
 <span class="g copyable">${currentOrigin}/?format=3&source=jin18</span> <button class="copy-btn" data-url="${currentOrigin}/?format=3&source=jin18">复制</button></pre>
 
-  <p>精简版+成人（jingjian）</p>
-<pre>原始 JSON：
+      <p>精简版+成人（jingjian）</p>
+      <pre>原始 JSON：
 <span class="g copyable">${currentOrigin}/?format=0&source=jingjian</span> <button class="copy-btn" data-url="${currentOrigin}/?format=0&source=jingjian">复制</button><br>
 中转 JSON：
 <span class="g copyable">${currentOrigin}/?format=1&source=jingjian</span> <button class="copy-btn" data-url="${currentOrigin}/?format=1&source=jingjian">复制</button><br>
@@ -627,8 +598,8 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
 中转 Base58：
 <span class="g copyable">${currentOrigin}/?format=3&source=jingjian</span> <button class="copy-btn" data-url="${currentOrigin}/?format=3&source=jingjian">复制</button></pre>
 
-  <p>完整版（full，默认）</p>
-<pre>原始 JSON：
+      <p>完整版（full，默认）</p>
+      <pre>原始 JSON：
 <span class="g copyable">${currentOrigin}/?format=0&source=full</span> <button class="copy-btn" data-url="${currentOrigin}/?format=0&source=full">复制</button><br>
 中转 JSON：
 <span class="g copyable">${currentOrigin}/?format=1&source=full</span> <button class="copy-btn" data-url="${currentOrigin}/?format=1&source=full">复制</button><br>
@@ -636,7 +607,7 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
 <span class="g copyable">${currentOrigin}/?format=2&source=full</span> <button class="copy-btn" data-url="${currentOrigin}/?format=2&source=full">复制</button><br>
 中转 Base58：
 <span class="g copyable">${currentOrigin}/?format=3&source=full</span> <button class="copy-btn" data-url="${currentOrigin}/?format=3&source=full">复制</button></pre>
-</div>
+    </div>
 
     <div class="section">
       <div class="section-title">✨ 功能特性</div>
@@ -671,19 +642,19 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
     </div>
   </div>
 
-<script>
-  document.querySelectorAll('.copy-btn').forEach((btn) => {
-    btn.addEventListener('click', function() {
-      const url = this.dataset.url;
-      if (url) {
-        navigator.clipboard.writeText(url).then(() => {
-          this.innerText = '已复制！';
-          setTimeout(() => (this.innerText = '复制'), 1500);
-        });
-      }
+  <script>
+    document.querySelectorAll('.copy-btn').forEach((btn) => {
+      btn.addEventListener('click', function() {
+        const url = this.dataset.url;
+        if (url) {
+          navigator.clipboard.writeText(url).then(() => {
+            this.innerText = '已复制！';
+            setTimeout(() => (this.innerText = '复制'), 1500);
+          });
+        }
+      });
     });
-  });
-</script>
+  </script>
 </body>
 </html>`
 
