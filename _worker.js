@@ -933,7 +933,7 @@ m3u8 播放      → 走 <span class="g">/m3u8?url=</span>, .ts 子链接自动�
     </div>
 
     <div class="footer">
-      <a href="https://github.com/vke1011/CORSAPI" target="_blank">djsevenx1/CORSAPI</a>
+      <a href="https://github.com/vke1011/CORSAPI" target="_blank">vke1011/CORSAPI</a>
       &nbsp;·&nbsp;
       <a href="https://github.com/djsevenx1/LunaTV-Mobile" target="_blank">LunaTV-Mobile</a>
       <br>
