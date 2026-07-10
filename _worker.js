@@ -24,9 +24,9 @@ const EXCLUDE_HEADERS = new Set([
 ])
 
 const JSON_SOURCES = {
-  'jin18': 'https://raw.githubusercontent.com/hafrey1/LunaTV-config/refs/heads/main/jin18.json',
-  'jingjian': 'https://raw.githubusercontent.com/hafrey1/LunaTV-config/refs/heads/main/jingjian.json',
-  'full': 'https://raw.githubusercontent.com/hafrey1/LunaTV-config/refs/heads/main/LunaTV-config.json'
+  'jin18': 'https://raw.githubusercontent.com/vke1011/LunaTV-config/refs/heads/main/jin18.json',
+  'jingjian': 'https://raw.githubusercontent.com/vke1011/LunaTV-config/refs/heads/main/jingjian.json',
+  'full': 'https://raw.githubusercontent.com/vke1011/LunaTV-config/refs/heads/main/LunaTV-config.json'
 }
 
 const FORMAT_CONFIG = {
@@ -791,6 +791,19 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
     .footer a:hover {
       text-decoration: underline;
     }
+    .copy-btn {
+      background: var(--luna-green);
+      color: #052e16;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin-left: 6px;
+      font-size: 0.85em;
+      cursor: pointer;
+    }
+    .copy-btn:hover {
+      background: var(--luna-green-deep);
+    }
     @media (max-width: 600px) {
       body { padding: 16px 12px; }
       .hero { padding: 22px 18px; }
@@ -844,6 +857,54 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
       <pre>请求: <span class="g">${currentOrigin}/?url=https://api.example.com/list&page=1&limit=10</span>
 转发: <span class="d">https://api.example.com/list?page=1&limit=10</span></pre>
     </div>
+
+    <!-- 配置订阅链接 -->
+    <div class="section">
+      <div class="section-title">配置订阅链接</div>
+      <p>精简版（jin18）</p>
+      <pre>原始 JSON：
+<span class="g copyable">${currentOrigin}/?format=0&source=jin18</span> <button class="copy-btn" data-url="${currentOrigin}/?format=0&source=jin18">复制</button><br>
+中转 JSON：
+<span class="g copyable">${currentOrigin}/?format=1&source=jin18</span> <button class="copy-btn" data-url="${currentOrigin}/?format=1&source=jin18">复制</button><br>
+原始 Base58：
+<span class="g copyable">${currentOrigin}/?format=2&source=jin18</span> <button class="copy-btn" data-url="${currentOrigin}/?format=2&source=jin18">复制</button><br>
+中转 Base58：
+<span class="g copyable">${currentOrigin}/?format=3&source=jin18</span> <button class="copy-btn" data-url="${currentOrigin}/?format=3&source=jin18">复制</button></pre>
+
+      <p>精简版+成人（jingjian）</p>
+      <pre>原始 JSON：
+<span class="g copyable">${currentOrigin}/?format=0&source=jingjian</span> <button class="copy-btn" data-url="${currentOrigin}/?format=0&source=jingjian">复制</button><br>
+中转 JSON：
+<span class="g copyable">${currentOrigin}/?format=1&source=jingjian</span> <button class="copy-btn" data-url="${currentOrigin}/?format=1&source=jingjian">复制</button><br>
+原始 Base58：
+<span class="g copyable">${currentOrigin}/?format=2&source=jingjian</span> <button class="copy-btn" data-url="${currentOrigin}/?format=2&source=jingjian">复制</button><br>
+中转 Base58：
+<span class="g copyable">${currentOrigin}/?format=3&source=jingjian</span> <button class="copy-btn" data-url="${currentOrigin}/?format=3&source=jingjian">复制</button></pre>
+
+      <p>完整版（full，默认）</p>
+      <pre>原始 JSON：
+<span class="g copyable">${currentOrigin}/?format=0&source=full</span> <button class="copy-btn" data-url="${currentOrigin}/?format=0&source=full">复制</button><br>
+中转 JSON：
+<span class="g copyable">${currentOrigin}/?format=1&source=full</span> <button class="copy-btn" data-url="${currentOrigin}/?format=1&source=full">复制</button><br>
+原始 Base58：
+<span class="g copyable">${currentOrigin}/?format=2&source=full</span> <button class="copy-btn" data-url="${currentOrigin}/?format=2&source=full">复制</button><br>
+中转 Base58：
+<span class="g copyable">${currentOrigin}/?format=3&source=full</span> <button class="copy-btn" data-url="${currentOrigin}/?format=3&source=full">复制</button></pre>
+    </div>
+
+  <script>
+    document.querySelectorAll('.copy-btn').forEach((btn) => {
+      btn.addEventListener('click', function() {
+        const url = this.dataset.url;
+        if (url) {
+          navigator.clipboard.writeText(url).then(() => {
+            this.innerText = '已复制！';
+            setTimeout(() => (this.innerText = '复制'), 1500);
+          });
+        }
+      });
+    });
+  </script>
 
     <!-- 特性 -->
     <div class="section">
