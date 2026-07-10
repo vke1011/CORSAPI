@@ -203,6 +203,12 @@ async function handleRequest(request) {
     return new Response('OK', { status: 200, headers: CORS_HEADERS })
   }
 
+  // 🚀 测速端点：流式返回指定大小随机字节
+  // 默认 1MB, ?size=N (MB), 范围 1-50. 客户端测得下载速度 = 用户到 worker 的实际速度
+  if (pathname === '/speed') {
+    return handleSpeedTest(reqUrl)
+  }
+
   // 🔑 新增：处理源专属路径 /p/{sourceId}?url=...
   // 这样可以让 TVBox 认为每个源是不同的域名/路径
   if (pathname.startsWith('/p/') && targetUrlParam) {
@@ -462,6 +468,24 @@ async function handleM3u8Request(request, targetUrlParam, currentOrigin) {
     })
     clearTimeout(timeoutId)
     const text = await upstream.text()
+
+    // v2.0.63: 检测上游返回的是不是有效 m3u8 (以 #EXTM3U 开头).
+    //   有些源给的是 /share/xxx 分享页 (HTML), worker 之前把 HTML 当 m3u8
+    //   解析, 每行包一层 ?url= 返回伪 m3u8 → libmpv "Failed to recognize
+    //   file format". 现在不是 m3u8 就原样转发 (带原 Content-Type), 让
+    //   客户端自己处理.
+    const trimmed = text.trimStart()
+    if (!trimmed.startsWith('#EXTM3U')) {
+      const headers = new Headers(upstream.headers)
+      headers.set('Access-Control-Allow-Origin', '*')
+      headers.delete('content-encoding')
+      headers.delete('content-length')
+      return new Response(text, {
+        status: upstream.status,
+        statusText: upstream.statusText,
+        headers,
+      })
+    }
 
     // 简单判断 master playlist (含 #EXT-X-STREAM-INF) → 递归把所有 variant m3u8 也包一层
     const isMaster = /#EXT-X-STREAM-INF/i.test(text)
@@ -906,6 +930,7 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
     });
   </script>
 
+
     <!-- 特性 -->
     <div class="section">
       <div class="section-title">功能特性</div>
@@ -933,7 +958,7 @@ m3u8 播放      → 走 <span class="g">/m3u8?url=</span>, .ts 子链接自动�
     </div>
 
     <div class="footer">
-      <a href="https://github.com/vke1011/CORSAPI" target="_blank">vke1011/CORSAPI</a>
+      <a href="https://github.com/djsevenx1/CORSAPI" target="_blank">djsevenx1/CORSAPI</a>
       &nbsp;·&nbsp;
       <a href="https://github.com/djsevenx1/LunaTV-Mobile" target="_blank">LunaTV-Mobile</a>
       <br>
@@ -946,6 +971,39 @@ m3u8 播放      → 走 <span class="g">/m3u8?url=</span>, .ts 子链接自动�
   return new Response(html, {
     status: 200,
     headers: { 'Content-Type': 'text/html; charset=utf-8', ...CORS_HEADERS }
+  })
+}
+
+// ---------- 测速端点 ----------
+// 流式返回指定 MB 数的随机字节, 客户端测下载速度 = 用户到 worker 的实际带宽
+// 默认 1MB, ?size=N (MB), 范围 1-3 (v2.0.84 缩小到 3MB 上限).
+// v2.0.84 用 Uint8Array 一次性 Response, 不用 ReadableStream/TransformStream,
+//   避免 CF edge backpressure 切断问题.
+//   v2.0.80 setTimeout 0 → CF edge 误判流空闲切断 (mobile 收到 0 字节)
+//   v2.0.81 一次性 50MB Uint8Array → 1MB 也 500 (CF Workers 内存峰值问题)
+//   v2.0.82 start 一次性 enqueue → CF edge 反复切断, 1MB 测试 15s 只传 415KB
+//   v2.0.83 pull + TransformStream → 太复杂, 仍然会被 backpressure 切
+//   v2.0.84 Uint8Array(size).fill(0) 不调 crypto.getRandomValues, Response 直接 return.
+//     1MB / 2MB / 3MB Uint8Array 内存峰值 < 4MB, 远低于 128MB 限制
+//     不用 random 是因为 crypto.getRandomValues 在某些 CF edge 节点会触发额外内存分配
+//     测速场景不需要密码学安全随机, 0 字节能填满带宽就够
+async function handleSpeedTest(reqUrl) {
+  const sizeParam = parseInt(reqUrl.searchParams.get('size') || '1', 10)
+  // v2.0.84: 上限 3MB, 内存峰值 < 4MB 完全安全
+  const sizeMB = Math.max(1, Math.min(3, isNaN(sizeParam) ? 1 : sizeParam))
+  const totalBytes = sizeMB * 1024 * 1024
+  // 一次性 Uint8Array 全填 0, 不调 crypto.getRandomValues (避免某些节点内存爆)
+  const buffer = new Uint8Array(totalBytes)
+
+  return new Response(buffer, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/octet-stream',
+      'Content-Length': totalBytes.toString(),
+      'Content-Disposition': `attachment; filename="speedtest-${sizeMB}mb.bin"`,
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      ...CORS_HEADERS
+    }
   })
 }
 
