@@ -918,6 +918,7 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
         <div class="feat"><b>bgm.tv fallback</b><br>UA / Referer 自动补</div>
         <div class="feat"><b>M3U8 KV 缓存</b><br>5 分钟复用, 减少 worker CPU</div>
         <div class="feat"><b>HTTP/3 (QUIC)</b><br>Alt-Svc 头提示升级, CF 默认开</div>
+        <div class="feat"><b>JSON 配置订阅</b><br> 多源切换：精简 / 增强 / 完整</div>
       </div>
     </div>
 
