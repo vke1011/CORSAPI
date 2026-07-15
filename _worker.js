@@ -235,8 +235,6 @@ async function handleRequest(request) {
 
 // ---------- 代理请求处理子模块 ----------
 async function handleProxyRequest(request, targetUrlParam, currentOrigin) {
-  let matchHit = null
-  let matchErr = ''  // v2.0.20l 诊断
   // 🚨 防止递归调用自身
   if (targetUrlParam.startsWith(currentOrigin)) {
     return errorResponse('Loop detected: self-fetch blocked', { url: targetUrlParam }, 400)
@@ -276,30 +274,19 @@ async function handleProxyRequest(request, targetUrlParam, currentOrigin) {
     return errorResponse('Invalid URL', { url: fullTargetUrl }, 400)
   }
 
-  // v2.0.20p: 优先用 worker 自带 Cache API, 绕开 Bunny.net 40 天老缓存
-  // CACHE_KEY_VERSION 改了就让所有旧 cache key 失效 (一次部署秒清老 404 cache)
-  const CACHE_KEY_VERSION = 2
+  // v2.0.20h: 优先用 worker 自带 Cache API, 绕开 Bunny.net 40 天老缓存
   if (request.method === 'GET') {
     try {
       const cache = caches.default
-      const verParam = reqUrl.searchParams.get('v')
-      if (verParam === '0') {
-        matchHit = 'bypass'
-      } else {
-        const cacheKey = new Request(targetURL.toString() + '#cv=' + CACHE_KEY_VERSION, { method: 'GET' })
-        const cached = await cache.match(cacheKey)
-        if (cached) {
-          const h = new Headers(cached.headers)
-          h.set('Cache-Control', 'no-store')
-          h.set('X-Cache', 'WORKER-HIT')
-          h.set('X-Cache-Diag', 'hit')
-          return new Response(await cached.arrayBuffer(), { status: cached.status, headers: h })
-        }
-        matchHit = false
+      const cacheKey = new Request(targetURL.toString(), { method: 'GET', headers: request.headers })
+      const cached = await cache.match(cacheKey)
+      if (cached) {
+        const h = new Headers(cached.headers)
+        h.set('Cache-Control', 'no-store')
+        h.set('X-Cache', 'WORKER-HIT')
+        return new Response(await cached.arrayBuffer(), { status: cached.status, headers: h })
       }
-    } catch (e) {
-      matchErr = e.message
-    }
+    } catch {}
   }
 
   // 构造透传请求头,如果客户端没带必要的头,按目标域名补上 fallback
@@ -338,31 +325,14 @@ async function handleProxyRequest(request, targetUrlParam, currentOrigin) {
     const response = await fetch(proxyRequest, fetchOptions)
     clearTimeout(timeoutId)
 
-    // v2.0.20o: 存到 worker Cache, 绕开 Bunny.net 40 天老缓存
-    // 关键: 1) 必须 status 200 + content-type image/* (避免缓存 HTML/JSON 错误页)
-    //      2) TTL 10 分钟短缓存, 出问题能快速自愈
-    //      3) ?v=0 强制 bypass 不存
-    const verParam = reqUrl.searchParams.get('v')
-    const respCT = (response.headers.get('content-type') || '').toLowerCase()
-    const isImage = respCT.startsWith('image/')
-    if (request.method === 'GET' && response.status === 200 && isImage && verParam !== '0') {
+    // v2.0.20h: 存到 worker Cache, 下次同 URL 直接 hit
+    if (request.method === 'GET' && response.status === 200) {
       try {
         const cache = caches.default
-        const cacheKey = new Request(targetURL.toString() + '#cv=' + CACHE_KEY_VERSION, { method: 'GET' })
-        const cacheHeaders = new Headers(response.headers)
-        cacheHeaders.set('Cache-Control', 'public, max-age=600')  // 10 分钟, 短 TTL 快速自愈
-        const respToCache = new Response(response.clone().body, { status: response.status, headers: cacheHeaders })
+        const cacheKey = new Request(targetURL.toString(), { method: 'GET', headers: upstreamHeaders })
+        const respToCache = new Response(response.clone().body, { status: response.status, headers: response.headers })
         await cache.put(cacheKey, respToCache)
-        matchHit = false
-      } catch (e) {
-        matchErr = e.message
-      }
-    } else if (response.status !== 200) {
-      matchErr = 'skip-cache:status=' + response.status
-    } else if (verParam === '0') {
-      matchErr = 'skip-cache:bypass'
-    } else {
-      matchErr = 'skip-cache:ct=' + respCT
+      } catch (e) {}
     }
 
     const responseHeaders = new Headers(CORS_HEADERS)
@@ -371,9 +341,6 @@ async function handleProxyRequest(request, targetUrlParam, currentOrigin) {
         responseHeaders.set(key, value)
       }
     }
-    // v2.0.20l: Cache API 诊断 header
-    responseHeaders.set('X-Cache-Diag', (matchHit === null ? 'no-check' : matchHit ? 'hit' : 'miss') + (matchErr ? ':' + matchErr : ''))
-
     // v2.0.20f: 默认所有响应 no-store, 防止 CF 边缘缓存 Bunny.net 的 40 天老响应
     if (response.status === 200) {
       responseHeaders.set('Cache-Control', 'no-store, no-cache, must-revalidate')
@@ -1005,7 +972,7 @@ async function handleHomePage(currentOrigin, defaultPrefix) {
         <div class="feat"><b>超时保护</b><br>9 秒,避免悬挂</div>
         <div class="feat"><b>自反循环检测</b><br>防止 worker 套 worker</div>
         <div class="feat"><b>bgm.tv fallback</b><br>UA / Referer 自动补</div>
-        <div class="feat"><b>M3U8 KV 缓存 CANARY46</b><br>5 分钟复用, 减少 worker CPU</div>
+        <div class="feat"><b>M3U8 KV 缓存</b><br>5 分钟复用, 减少 worker CPU</div>
         <div class="feat"><b>HTTP/3 (QUIC)</b><br>Alt-Svc 头提示升级, CF 默认开</div>
         <div class="feat"><b>JSON 配置订阅</b><br> 多源切换：精简 / 增强 / 完整</div>
       </div>
