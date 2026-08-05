@@ -24,7 +24,7 @@ const EXCLUDE_HEADERS = new Set([
 ])
 
 const JSON_SOURCES = {
-  'jin18': 'https://raw.githubusercontent.com/vke1012/LunaTV-config/refs/heads/main/jin18.json',
+  'jin18': 'https://raw.githubusercontent.com/vke1011/LunaTV-config/refs/heads/main/jin18.json',
   'jingjian': 'https://raw.githubusercontent.com/vke1011/LunaTV-config/refs/heads/main/jingjian.json',
   'full': 'https://raw.githubusercontent.com/vke1011/LunaTV-config/refs/heads/main/LunaTV-config.json'
 }
