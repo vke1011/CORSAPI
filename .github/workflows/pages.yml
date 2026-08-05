@@ -1,33 +1,45 @@
-name: 部署到 Cloudflare Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [ main ]
     paths:
-      - '_worker.js'
-      - 'wrangler.toml'
-      - '.github/workflows/deploy.yml'
+      - 'web-editor/**'   # 仅在 web-editor 目录下有变更时触发
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'web-editor/**'   # 仅在 pull request 涉及 web-editor 目录时触发
+  workflow_dispatch:   # 添加手动触发
+    inputs:
+      deploy_message:
+        description: 'Deployment message'
+        required: false
+        default: 'Manual deployment'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
-
-      - name: 设置 Node.js 环境
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: 安装 Wrangler
-        run: npm install -g wrangler
-
-      - name: 部署到 Cloudflare Pages
-        run: |
-          wrangler pages deploy . \
-            --project-name=tmdb-8d1 \
-            --commit-dirty=true
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+     
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: './web-editor'
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
